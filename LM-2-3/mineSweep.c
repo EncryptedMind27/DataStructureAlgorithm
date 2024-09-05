@@ -1,69 +1,59 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
-#define ROWS 5
-#define COLS 5
+#define rOWS 5
+#define cOLS 10
 
-int** generateHintMap(int**);
-void displayMap(int**);
+void generateHintMap(int mines[rOWS][cOLS], int hintMap[rOWS][cOLS]) {
+    int dr[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
+    int dc[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
 
-int main(void){
-
-	srand(time(NULL));
-
-	int** map = (int**)malloc(sizeof(int*)*ROWS);
-	for(int i=0;i<ROWS;i++){
-		map[i] = (int*)malloc(sizeof(int)*COLS);
-		for(int j=0;j<COLS;j++) 
-			map[i][j] = ((rand()%100)<70)? 0:1;
-	}
-
-	printf("Original Map: \n");
-	displayMap(map);
-	map = generateHintMap(map);
-	printf("Hinted Map: \n");
-	displayMap(map);
-
-	for(int i=0;i<ROWS;i++){
-		free(map[i]);
-		map[i] = NULL;
-	}
-	free(map);
-	map = NULL;
-
-	return 0;
+    for (int row = 0; row < rOWS; row++) {
+        for (int col = 0; col < cOLS; col++) {
+            if (mines[row][col] == 1) {
+                hintMap[row][col] = -1;
+            } else {
+                int ctrMines = 0;
+                for (int i = 0; i < 8; i++) {
+                    int newRow = row + dr[i];
+                    int newCol = col + dc[i];
+                    if (newRow >= 0 && newRow < rOWS && newCol >= 0 && newCol < cOLS &&
+                        mines[newRow][newCol] == 1) {
+                        ctrMines++;
+                    }
+                }
+                hintMap[row][col] = ctrMines;
+            }
+        }
+    }
 }
 
-int** generateHintMap(int** map){
-	int yAxis[] = {-1,-1,-1, 0, 0, 1, 1, 1};
-	int xAxis[] = {-1, 0, 1,-1, 1,-1, 0, 1};
+int main() {
 
-	for(int i=0;i<ROWS;i++){
-		for(int j=0;j<COLS;j++){
-			if(map[i][j] == 1){
-				map[i][j] = -1;
-			} else {
-				int ctr = 0;
-				for(int k=0;k<8;k++){
-					int yPos = i + yAxis[k];
-					int xPos = j + xAxis[k];
+    srand(time(NULL));
 
-					if(yPos < ROWS && yPos >= 0 && xPos < COLS && xPos >= 0 && map[yPos][xPos] == 1)
-						ctr++;
-				}
-				map[i][j] = ctr;
-			}
-		}
-	}
-	return map;
-}
+    int mines[rOWS][cOLS];
 
-void displayMap(int** map){
-	for(int i=0;i<ROWS;i++){
-		for(int j=0;j<COLS;j++)
-			printf("%2d ",map[i][j]);
-		printf("\n");	
-	}
-	return;
+    printf("Original Map:\n");
+    for (int row = 0; row < rOWS; row++) {
+        for (int col = 0; col < cOLS; col++) {
+            mines[row][col] = (rand()%100<70)? 0:1;
+            printf("%2d ", mines[row][col]);
+        }
+        printf("\n");
+    }
+
+    int hintMap[rOWS][cOLS];
+    generateHintMap(mines, hintMap);
+    printf("\n");
+     printf("Hinted Map: \n");
+    for (int row = 0; row < rOWS; row++) {
+        for (int col = 0; col < cOLS; col++) {
+            printf("%2d ", hintMap[row][col]);
+        }
+        printf("\n");
+    }
+
+    return 0;
 }
